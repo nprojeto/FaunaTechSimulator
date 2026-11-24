@@ -1,0 +1,521 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Simulador de Parcerias FaunaTech</title>
+<meta name="description" content="Simule quanto a sua audiência pode render indicando a FaunaTech: comissão recorrente sobre cada assinatura.">
+<meta name="theme-color" content="#050604">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Simulador de Parcerias FaunaTech">
+<meta property="og:description" content="Simule quanto a sua audiência pode render indicando a FaunaTech: comissão recorrente sobre cada assinatura.">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@500;600;700&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* reset mínimo — o restante do visual está na folha abaixo */
+:root{
+  color-scheme: dark;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+body{ margin: 0 }
+img{ max-width: 100% }
+[hidden]{ display: none !important }
+</style>
+<style>
+/* Coluna única sobre preto: cadeia do cálculo → painel do simulador → linha-resumo.
+   Identidade FaunaTech: preto, off-white #F2F2EE e verde oliva #6C8138. Tema único escuro. */
+:root{
+  --preto:      #050604;
+  --superficie: #0E1109;
+  --elevado:    #161A10;
+  --linha:      #2A3020;
+  --linha-forte:#3C4630;
+  --tinta:      #F2F2EE;
+  --tinta-fraca:#A3A89A;
+  --verde:      #6C8138;
+  --verde-claro:#93AC4F;
+  --oliva:      #657242;
+  --vermelho:   #C96A4A;
+
+  --display: "Oxanium", "Trebuchet MS", system-ui, sans-serif;
+  --corpo: "Inter", -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  color-scheme: dark;
+}
+
+*{ box-sizing: border-box }
+
+body{
+  background: var(--preto);
+  color: var(--tinta);
+  font-family: var(--corpo);
+  font-size: 16px;
+  line-height: 1.55;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+.faixa{ width: 100% }
+.dentro{
+  max-width: 980px;
+  margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+/* ---------- topo ---------- */
+.topo{ position: relative; overflow: hidden; border-bottom: 1px solid var(--linha) }
+.topo .dentro{ padding-block: 40px 44px; position: relative; z-index: 1 }
+.topo::after{
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(60% 120% at 88% 40%, rgba(108,129,56,.26), transparent 70%);
+}
+.logo{ display: block; width: 240px; max-width: 62%; height: auto }
+h1{
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: clamp(1.9rem, 1.2rem + 3vw, 3rem);
+  line-height: 1.05;
+  letter-spacing: -.01em;
+  text-wrap: balance;
+  margin: 26px 0 0;
+}
+h1 em{ font-style: normal; color: var(--verde-claro) }
+.chamada{
+  color: var(--tinta-fraca);
+  max-width: 54ch;
+  margin: 14px 0 0;
+  font-size: 1.05rem;
+}
+
+/* ---------- blocos ---------- */
+section{ border-bottom: 1px solid var(--linha) }
+section .dentro{ padding-block: 40px }
+.rotulo{
+  font-family: var(--display);
+  font-size: .78rem;
+  font-weight: 600;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--verde-claro);
+  margin: 0 0 6px;
+}
+h2{
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 1.45rem;
+  letter-spacing: -.005em;
+  margin: 0 0 4px;
+  text-wrap: balance;
+}
+.sub{ color: var(--tinta-fraca); margin: 0 0 26px; max-width: 62ch; font-size: .95rem }
+
+/* ---------- cadeia do cálculo ---------- */
+.cadeia{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(158px, 1fr));
+  gap: 10px;
+}
+.elo{
+  background: var(--superficie);
+  border: 1px solid var(--linha);
+  border-radius: 3px;
+  padding: 15px 14px 16px;
+  min-width: 0;
+}
+.elo.destaque{ border-color: var(--verde); background: var(--elevado) }
+.elo-t{
+  font-size: .7rem; text-transform: uppercase; letter-spacing: .08em;
+  color: var(--tinta-fraca); margin: 0 0 9px; font-weight: 500;
+  /* duas linhas reservadas, para os valores ficarem na mesma altura em todos os cards */
+  min-height: 2.2em;
+}
+.elo-v{
+  font-family: var(--display); font-weight: 700;
+  font-size: clamp(1.15rem, .95rem + .9vw, 1.5rem);
+  font-variant-numeric: tabular-nums; line-height: 1; margin: 0;
+}
+.elo.negativo .elo-v{ color: var(--vermelho) }
+.elo.destaque .elo-v{ color: var(--verde-claro) }
+.elo-n{ font-size: .76rem; color: var(--tinta-fraca); margin: 8px 0 0; line-height: 1.4 }
+
+/* ---------- simulador ---------- */
+.painel{
+  display: grid;
+  grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+}
+.controles{
+  background: var(--superficie);
+  border: 1px solid var(--linha);
+  border-radius: 3px;
+  padding: 22px 20px 24px;
+  display: grid;
+  gap: 28px;
+  min-width: 0;
+}
+.campo{ display: grid; gap: 10px }
+.campo-topo{ display: flex; align-items: baseline; justify-content: space-between; gap: 12px }
+.campo label{ font-size: .84rem; color: var(--tinta-fraca); font-weight: 500 }
+.campo output{
+  font-family: var(--display); font-weight: 700; font-size: 1.5rem;
+  font-variant-numeric: tabular-nums; color: var(--tinta); line-height: 1;
+}
+.campo output small{ font-size: .72rem; font-weight: 500; color: var(--tinta-fraca); margin-left: 3px }
+
+#seguidores{
+  width: 100%;
+  background: var(--preto);
+  border: 1px solid var(--linha-forte);
+  border-radius: 3px;
+  color: var(--tinta);
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 1.6rem;
+  font-variant-numeric: tabular-nums;
+  padding: 12px 14px;
+  line-height: 1.1;
+}
+#seguidores:focus-visible{ outline: 2px solid var(--verde-claro); outline-offset: 2px; border-color: var(--verde) }
+
+.chips{ display: flex; flex-wrap: wrap; gap: 6px }
+.chip{
+  background: transparent;
+  border: 1px solid var(--linha-forte);
+  border-radius: 999px;
+  color: var(--tinta-fraca);
+  font-family: var(--corpo);
+  font-size: .78rem;
+  padding: 5px 11px;
+  cursor: pointer;
+  font-variant-numeric: tabular-nums;
+}
+.chip:hover{ border-color: var(--verde); color: var(--tinta) }
+.chip:focus-visible{ outline: 2px solid var(--verde-claro); outline-offset: 2px }
+.chip[aria-pressed="true"]{ background: var(--verde); border-color: var(--verde); color: #0B0D07; font-weight: 600 }
+
+input[type=range]{
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 22px; background: transparent; margin: 0; cursor: pointer;
+}
+input[type=range]::-webkit-slider-runnable-track{
+  height: 3px; background: var(--linha-forte); border-radius: 2px;
+}
+input[type=range]::-moz-range-track{
+  height: 3px; background: var(--linha-forte); border-radius: 2px;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance: none; appearance: none;
+  width: 18px; height: 18px; margin-top: -7.5px; border-radius: 50%;
+  background: var(--verde-claro); border: 3px solid var(--preto);
+  box-shadow: 0 0 0 1px var(--verde-claro);
+}
+input[type=range]::-moz-range-thumb{
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--verde-claro); border: 3px solid var(--preto);
+  box-shadow: 0 0 0 1px var(--verde-claro);
+}
+input[type=range]:focus-visible{ outline: 2px solid var(--verde-claro); outline-offset: 6px; border-radius: 2px }
+.escala{
+  display: flex; justify-content: space-between;
+  font-size: .72rem; color: var(--tinta-fraca); font-variant-numeric: tabular-nums;
+}
+.ajuda{ font-size: .78rem; color: var(--tinta-fraca); margin: 0; line-height: 1.45 }
+
+.resultados{ display: grid; gap: 10px; min-width: 0 }
+.placar{ display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px }
+.ficha{
+  background: var(--superficie);
+  border: 1px solid var(--linha);
+  border-radius: 3px;
+  padding: 16px 16px 18px;
+  min-width: 0;
+}
+.ficha.principal{
+  grid-column: 1 / -1;
+  border-color: var(--verde);
+  background: linear-gradient(180deg, var(--elevado), var(--superficie));
+  padding-block: 22px 24px;
+}
+.ficha-t{
+  font-size: .72rem; text-transform: uppercase; letter-spacing: .1em;
+  color: var(--tinta-fraca); margin: 0 0 10px; font-weight: 500;
+}
+.ficha-v{
+  font-family: var(--display); font-weight: 700;
+  font-size: clamp(1.3rem, 1.05rem + 1.1vw, 1.7rem);
+  font-variant-numeric: tabular-nums; line-height: 1; margin: 0;
+}
+.ficha.principal .ficha-v{
+  font-size: clamp(2.1rem, 1.4rem + 3.4vw, 3.2rem);
+  color: var(--verde-claro);
+}
+.ficha-v span{ font-size: .5em; color: var(--tinta-fraca); font-weight: 600; margin-left: 4px }
+.ficha-n{ font-size: .78rem; color: var(--tinta-fraca); margin: 8px 0 0; line-height: 1.4 }
+
+/* ---------- linha-resumo ---------- */
+.rolagem{ overflow-x: auto; border: 1px solid var(--linha); border-radius: 3px }
+table{ border-collapse: collapse; width: 100%; min-width: 520px; font-variant-numeric: tabular-nums }
+caption{ text-align: left; font-size: .8rem; color: var(--tinta-fraca); padding: 0 0 10px }
+th, td{ padding: 14px 16px; text-align: right; font-size: 1rem; border-bottom: none }
+th:first-child, td:first-child{ text-align: left }
+thead th{
+  font-family: var(--display); font-weight: 600; font-size: .74rem;
+  text-transform: uppercase; letter-spacing: .1em; color: var(--tinta-fraca);
+  background: var(--superficie); border-bottom: 1px solid var(--linha-forte);
+  padding-block: 12px;
+}
+tbody td{ font-family: var(--display); font-weight: 600 }
+tbody td:last-child, tbody td:nth-child(3){ color: var(--verde-claro) }
+
+/* ---------- rodapé ---------- */
+.rodape .dentro{ padding-block: 32px 44px }
+.premissas{ margin: 0; padding: 0; list-style: none; display: grid; gap: 9px; max-width: 70ch }
+.premissas li{
+  font-size: .84rem; color: var(--tinta-fraca); padding-left: 18px; position: relative; line-height: 1.5;
+}
+.premissas li::before{
+  content: ""; position: absolute; left: 0; top: .55em;
+  width: 7px; height: 1px; background: var(--oliva);
+}
+.premissas b{ color: var(--tinta); font-weight: 600 }
+
+@media (max-width: 860px){
+  .painel{ grid-template-columns: minmax(0, 1fr) }
+}
+@media (max-width: 480px){
+  .placar{ grid-template-columns: minmax(0, 1fr) }
+}
+@media (prefers-reduced-motion: reduce){
+  *{ animation: none !important; transition: none !important }
+}
+</style>
+</head>
+<body>
+<header class="faixa topo">
+  <div class="dentro">
+    <img class="logo" src="data:image/png;base64,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" alt="FaunaTech">
+    <h1>Quanto a sua audiência<br><em>pode te render</em></h1>
+    <p class="chamada">Você indica a FaunaTech para os seus seguidores e recebe uma comissão sobre cada assinatura — todo mês, enquanto o assinante continuar na plataforma.</p>
+  </div>
+</header>
+
+<section class="faixa">
+  <div class="dentro">
+    <p class="rotulo">A conta por assinante</p>
+    <h2>De onde sai a comissão</h2>
+    <p class="sub">Tudo parte da mensalidade média da plataforma. Os impostos e os custos operacionais saem primeiro; a sua comissão incide sobre o que sobra.</p>
+    <div class="cadeia">
+      <div class="elo">
+        <p class="elo-t">Mensalidade média</p>
+        <p class="elo-v">R$ 49,90</p>
+        <p class="elo-n">Valor médio pago por assinante, por mês</p>
+      </div>
+      <div class="elo negativo">
+        <p class="elo-t">Impostos · 28%</p>
+        <p class="elo-v">− R$ 13,97</p>
+        <p class="elo-n">Carga tributária sobre a receita</p>
+      </div>
+      <div class="elo negativo">
+        <p class="elo-t">Custo operacional · 8%</p>
+        <p class="elo-v">− R$ 3,99</p>
+        <p class="elo-n">Processamento, infraestrutura e suporte</p>
+      </div>
+      <div class="elo">
+        <p class="elo-t">O que sobra</p>
+        <p class="elo-v">R$ 31,94</p>
+        <p class="elo-n">Base de cálculo da comissão</p>
+      </div>
+      <div class="elo destaque">
+        <p class="elo-t">Você · 3,5%</p>
+        <p class="elo-v" id="porAssinante">R$ 1,12</p>
+        <p class="elo-n">Por assinante, todo mês</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="faixa">
+  <div class="dentro">
+    <p class="rotulo">Simulador</p>
+    <h2>Faça a sua projeção</h2>
+    <p class="sub">Informe o tamanho da sua audiência e quanto dela você acredita que consegue converter em assinante.</p>
+
+    <div class="painel">
+      <div class="controles">
+        <div class="campo">
+          <div class="campo-topo">
+            <label for="seguidores">Seus seguidores</label>
+          </div>
+          <input type="text" id="seguidores" value="10.000" inputmode="numeric" autocomplete="off"
+                 enterkeyhint="done">
+          <div class="chips" role="group" aria-label="Tamanhos comuns de audiência">
+            <button type="button" class="chip" data-seg="5000">5 mil</button>
+            <button type="button" class="chip" data-seg="25000">25 mil</button>
+            <button type="button" class="chip" data-seg="100000">100 mil</button>
+            <button type="button" class="chip" data-seg="500000">500 mil</button>
+          </div>
+        </div>
+
+        <div class="campo">
+          <div class="campo-topo">
+            <label for="conversao">Quanto você converte</label>
+            <output id="saidaConversao" for="conversao">1,0<small>%</small></output>
+          </div>
+          <input type="range" id="conversao" min="0.1" max="10" step="0.1" value="1">
+          <div class="escala"><span>0,1%</span><span>10%</span></div>
+          <p class="ajuda">Parcela dos seguidores que vira assinante pagante. Campanhas de indicação costumam ficar entre 0,5% e 3%.</p>
+        </div>
+      </div>
+
+      <div class="resultados">
+        <div class="placar">
+          <div class="ficha principal">
+            <p class="ficha-t">Sua comissão por mês</p>
+            <p class="ficha-v" id="vMes">R$ 0<span>/mês</span></p>
+            <p class="ficha-n" id="nMes">Receita recorrente, enquanto os assinantes continuarem</p>
+          </div>
+          <div class="ficha">
+            <p class="ficha-t">Assinantes que você traz</p>
+            <p class="ficha-v" id="vAssinantes">0</p>
+            <p class="ficha-n" id="nAssinantes">Da sua audiência</p>
+          </div>
+          <div class="ficha">
+            <p class="ficha-t">Em 12 meses</p>
+            <p class="ficha-v" id="vAno">R$ 0</p>
+            <p class="ficha-n">Com a mesma base ativa o ano todo</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="faixa">
+  <div class="dentro">
+    <p class="rotulo">Resumo</p>
+    <h2>A sua simulação em uma linha</h2>
+    <p class="sub" id="subTabela">Acompanha o que você escolheu acima.</p>
+    <div class="rolagem">
+      <table>
+        <caption>Comissão de 3,5% sobre os R$ 31,94 que sobram por assinante.</caption>
+        <thead>
+          <tr>
+            <th scope="col">Seguidores</th>
+            <th scope="col">Conversão</th>
+            <th scope="col">Assinantes</th>
+            <th scope="col">Por mês</th>
+            <th scope="col">Em 12 meses</th>
+          </tr>
+        </thead>
+        <tbody id="corpoTabela"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<footer class="faixa rodape">
+  <div class="dentro">
+    <p class="rotulo">Premissas</p>
+    <ul class="premissas">
+      <li>Mensalidade média de <b>R$ 49,90</b> por assinante. É uma média entre os planos Mateiro e Veterano; o valor real varia conforme o plano e a periodicidade contratada.</li>
+      <li>Dedução de <b>28%</b> de impostos e de <b>8%</b> de custos operacionais, ambos sobre a mensalidade, antes do cálculo da comissão.</li>
+      <li>Comissão de <b>3,5%</b> sobre os R$ 31,94 restantes, equivalente a <b>R$ 1,12</b> por assinante ativo, por mês.</li>
+      <li>A comissão é <b>recorrente</b>: é paga em todos os meses em que o indicado permanecer assinando, e não apenas na adesão.</li>
+      <li>A taxa de conversão é <b>uma estimativa sua</b>. O número de seguidores não garante assinaturas: o resultado depende do quanto a sua audiência se parece com o público da plataforma.</li>
+      <li>A projeção de 12 meses considera que a base indicada permanece ativa o ano todo, sem cancelamentos.</li>
+      <li>Projeção para fins de estudo. Não constitui proposta comercial nem garantia de resultado.</li>
+    </ul>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  var MENSALIDADE = 49.90;
+  var IMPOSTO = 0.28;        // sobre a mensalidade
+  var OPERACIONAL = 0.08;    // sobre a mensalidade
+  var COMISSAO = 0.035;      // sobre o que sobra
+  var SOBRA = MENSALIDADE * (1 - IMPOSTO - OPERACIONAL);   // 31,936
+  var POR_ASSINANTE = SOBRA * COMISSAO;                    // 1,11776
+
+  var brl = new Intl.NumberFormat('pt-BR', { style:'currency', currency:'BRL' });
+  var num = new Intl.NumberFormat('pt-BR', { maximumFractionDigits:0 });
+  var pct = new Intl.NumberFormat('pt-BR', { minimumFractionDigits:1, maximumFractionDigits:1 });
+
+  var TETO_SEG = 50000000;
+
+  function assinantesDe(seguidores, taxa){ return Math.floor(seguidores * taxa / 100); }
+  function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+
+  var elSeg = document.getElementById('seguidores');
+  var elConv = document.getElementById('conversao');
+
+  // O campo guarda o número já com separador de milhar; a leitura só olha os dígitos.
+  function lerSeguidores(){
+    var digitos = String(elSeg.value).replace(/\D/g, '');
+    var v = digitos ? parseInt(digitos, 10) : 0;
+    return v > TETO_SEG ? TETO_SEG : v;
+  }
+
+  function formatarCampo(valor){
+    var texto = valor > 0 ? num.format(valor) : '';
+    if (elSeg.value !== texto){
+      elSeg.value = texto;
+      // O cursor vai para o fim: o campo é preenchido da esquerda para a direita.
+      try { elSeg.setSelectionRange(texto.length, texto.length); } catch (e) {}
+    }
+  }
+
+  function atualizar(){
+    var seguidores = lerSeguidores();
+    formatarCampo(seguidores);
+    var taxa = parseFloat(elConv.value);
+    var assinantes = assinantesDe(seguidores, taxa);
+    var mes = assinantes * POR_ASSINANTE;
+
+    document.getElementById('saidaConversao').innerHTML = pct.format(taxa) + '<small>%</small>';
+
+    document.getElementById('vMes').innerHTML = esc(brl.format(mes)) + '<span>/mês</span>';
+    document.getElementById('nMes').textContent = assinantes > 0
+      ? num.format(assinantes) + ' assinante' + (assinantes === 1 ? '' : 's') + ' × ' +
+        brl.format(POR_ASSINANTE) + ', todo mês'
+      : 'Informe sua audiência para ver o resultado';
+    document.getElementById('vAssinantes').textContent = num.format(assinantes);
+    document.getElementById('nAssinantes').textContent =
+      pct.format(taxa) + '% de ' + num.format(seguidores) + ' seguidores';
+    document.getElementById('vAno').textContent = brl.format(mes * 12);
+
+    document.getElementById('corpoTabela').innerHTML =
+      '<tr><td>' + num.format(seguidores) + '</td>' +
+      '<td>' + pct.format(taxa) + '%</td>' +
+      '<td>' + num.format(assinantes) + '</td>' +
+      '<td>' + brl.format(mes) + '</td>' +
+      '<td>' + brl.format(mes * 12) + '</td></tr>';
+
+    Array.prototype.forEach.call(document.querySelectorAll('.chip'), function(b){
+      b.setAttribute('aria-pressed', String(parseInt(b.dataset.seg, 10) === seguidores));
+    });
+  }
+
+  elSeg.addEventListener('input', atualizar);
+  elConv.addEventListener('input', atualizar);
+
+  Array.prototype.forEach.call(document.querySelectorAll('.chip'), function(b){
+    b.addEventListener('click', function(){
+      elSeg.value = b.dataset.seg;
+      atualizar();
+    });
+  });
+
+  document.getElementById('porAssinante').textContent = brl.format(POR_ASSINANTE);
+  atualizar();
+})();
+</script>
+</body>
+</html>
